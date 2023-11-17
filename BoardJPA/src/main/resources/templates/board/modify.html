@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시물 수정</title>
+<link rel="stylesheet" href="/css/board.css">
+<style>
+
+    #itemZone{
+        margin:auto;
+        text-align: center;
+        border: solid;
+        padding: 50px;
+    }
+    #tableZone{
+        width: 800px;
+        margin: auto;
+        font-Size: 200%;
+    }
+    #main{
+        text-align: center;
+    }
+
+    #topBanner{
+        margin-top: 10px;
+        margin-bottom: 10px;
+        max-width: 500px;
+        height: auto;
+        display: block;
+        margin: auto;
+    }
+
+    .modifyForm{
+        width: 60%;
+        height: auto;
+        margin: auto;
+        padding: 20px;
+        background-color: #FFFFFF;
+        text-align: center;
+        border: 4px solid gray;
+        border-radius: 30px;
+    }
+
+    .items{
+        width: 90%;
+        border: none;
+        border-bottom: 2px solid #adadad;
+        padding: 10px 10px;
+        outline: none;
+        color: #636e63;
+        height: 25px;
+        background: none;
+    }
+
+    #content{
+        width: 90%;
+        height: 300px;
+        box-sizing: border-box;
+        border: solid gray;
+        font-size: 16px;
+        resize: both;
+    }
+
+    .btn_write{
+        position: relative;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        margin-right: 30px;
+        width: 40%;
+        height: 40px;
+        background-color: #1D4D9F;
+        color: #636e63;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        display: inline;
+        border-radius: 30px;
+    }
+
+    .btn_cancle{
+        position: relative;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        width: 40%;
+        height: 40px;
+        background-color: #F08838;
+        background-size: 200%;
+        color: #636e63;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        display: inline;
+        border-radius: 30px;
+    }
+    
+  .fileuploadForm{
+        margin: 5px;
+        padding: 5px 5px 2px 30px;
+        text-align: left;
+        width: 90%;
+        }
+    .fileZone{
+    	border: solid #adadad;
+    	background-color: #a0a0a0;
+    	width: 97%;
+    	height: 80px;
+    	color: white;
+    	text-align: center;
+    	vertical-align: middle;
+    	padding: 5px;
+    	font-size: 120%;
+    }
+    .fileuploadList{
+    	border: solid #adadad;
+    	width: 97%;
+    	height: auto;
+    	paddign:5px;
+    	font-size: 120%;
+    }
+    
+    .filename{
+    	display: inline-block;
+    	vertical-align:top;
+    	width:50%;
+    }
+    
+    .filesize{
+    	display: inline-block;
+    	vertical-align:top;
+    	color: #30693D;
+    	width: 30%;
+    	margin-left: 10px;
+    	margin-right:5px;
+    }
+    
+</style>
+<script>
+
+window.onload=()=>{
+	const fileZone = 	document.querySelector('#fileZone');
+	const inputFile = document.querySelector('#inputFile');
+	
+	//fileZone을 클릭하면 발생하는 이벤트 처리
+	fileZone.addEventListener('click',(e)=>{
+		inputFile.click(e);
+	})//eventlistener end
+	
+	//파일탐색창을 열어 선택한 파일 정보를 files에 할당..
+	inputFile.addEventListener('change',(e)=>{
+		const files = e.target.files; //파일처리를 하기 위한 프로토타입으로 정의되어 있음
+		fileCheck(files);
+	})//eventlistener end
+	
+	//fileZone으로 dragenter 이벤트 발생 시 처리하는 이벤트 핸들러
+	fileZone.addEventListener('dragenter',(e)=>{
+		e.stopPropagation(); //상위 element들로의 이벤트 전파를 중단
+		e.preventDefault(); //웹브라우저의 고유 동작을 중단
+		fileZone.style.border = 'solid 2px #0B85A1';
+	})//addEventListener end
+	
+	//fileZone으로 dragover 이벤트 발생 시 처리하는 이벤트 핸들러
+	fileZone.addEventListener('dragover',(e)=>{
+		e.stopPropagation(); 
+		e.preventDefault(); 
+	})//addEventListener end
+	
+	//fileZone으로 drop 이벤트 발생 시 처리하는 이벤트 핸들러
+	fileZone.addEventListener('drop',(e)=>{
+		e.stopPropagation(); 
+		e.preventDefault(); 
+		const files = e.dataTransfer.files; //사용자가???설정한 파일??
+		fileCheck(files);	
+	})//addEventListener end
+	
+}//window.onload() end
+
+var uploadCountLimit = 5; //업로드 가능한 파일 갯수
+var fileCount = 0; //한번 선택해서 가져오는 파일의 갯수
+var fileNum = 0; //파일 고유 넘버
+var content_files = new Array();
+var rowCount = 0;
+
+const fileCheck =(files)=>{
+	
+	let filesArr = Object.values(files); //객체에서 key와 value 중 value만 반환하는 메서드
+	if(fileCount+filesArr.length>uploadCountLimit){
+		alert('파일은 최대'+uploadCountLimit+'개까지 업로드 가능할 수 있습니다.');
+		return;
+	}else fileCount = filesArr.length;
+	
+		filesArr.forEach((file)=>{
+			//FileReader 객체 : 웹애플맄이션이 비동기적으로 웹브라우저에서 파일을 읽을 때 사용하며,
+			//<input type="file">태그를 이용하여 사용자가 선택한 파일로부터 반환된 file List 객체나 
+			//drap n Drop 이벤트로 반환된 DataTransfer 객체로부터 데이터를 얻음
+			
+			var reader = new FileReader();
+			reader.readAsDataURL(file); //파일 읽기
+			
+			//reader.readAsDataURL실행으로 파일 읽기가 되면 read.onload 이벤트 핸들러를 통해 read.onload 이벤트 핸들러 내의
+			// 콜백 함수가 비동기적으로 실행됨
+			reader.onload = (e) =>{
+				//console.log("123"+file);
+				content_files.push(file);
+				//console.log("123sdfsfsd"+content_files[0]);
+				if(file.size > 1073741824){  //1GB
+					alert('파일 사이즈는 1G 이하로 등록하거라');
+				}
+				
+				rowCount++;
+				var row = "odd";
+				if(rowCount%2==0){row = "even";}
+				
+				let statusbar = document.createElement('div'); //JS DOM Object Dynamic create
+				statusbar.setAttribute('class', 'statusbar ',+row );
+				statusbar.setAttribute('id', 'file'+fileNum);
+				
+				//statusbar 요소 하위 요소 생성 <div class='fileName'>파일이름</div>
+				let filename = "<div class='filename'>"+file.name+"</div>";
+				//statusbar 요소 하위 요소 생성 <div class='fileSize'>파일사이즈</div>
+				let sizeStr = "";
+				let sizeKB = file.size/1024;
+				if(parseInt(sizeKB) > 1024){ var sizeMB = sizeKB/1024; sizeStr = sizeMB.toFixed(2)+" MB";}
+				else{ sizeStr = sizeKB.toFixed(2)+" KB"; }
+				let size = "<div class='filesize'>"+ sizeStr +"</div>";
+				
+				//삭제 버튼
+				let btn_delete = "<div class='btn_delete'><input type='button' value='삭제' onclick=fileDelete('file"+fileNum+"')></div>";
+				
+				statusbar.innerHTML = filename+size+btn_delete; //생성
+				
+				fileuploadList.appendChild(statusbar);
+				fileNum++;
+				
+			};//onload
+		});//forEach
+		
+		inputFile.value = '';
+		
+}//fileCheck
+
+//파일 삭제
+const fileDelete = (fileNumber) => {
+	var no = fileNumber.replace(/[^0-9]/g,""); //file0, file1.... 숫자 바로 앞까지 삭제 후 나머지 반환
+	//console.log("sdfjlksdjflsd: "+no+" :sdfsdfsdfsd"+content_files[no]);
+	content_files[no].is_delete = true; //JS에 제공하는 배열 삭제 함수..ㅎ
+	document.querySelector('#'+fileNumber).remove();
+	fileCount--;
+}
+
+const modifyForm1 = async() => {
+
+    let writer = document.querySelector('#writer'); //자바스크립트는 ''으로도 문자열을 표현할 수 있다.  
+    let title = document.querySelector('#title');  //id 값         
+    let content = document.querySelector('#content');   
+
+    //필수값 등록 시 값 입력여부 확인 로직
+    if(title.value === '' || title.value === null ){ //Document.WriteForm.title.value --> DOM(Document Object Model)구조
+        alert("제목을 입력하세요"); 
+        title.focus();
+        return false;
+    }
+
+    if(content.value === '' || content.value === null ){ 
+        alert("내용을 입력하세요"); 
+        content.focus();
+        return false;
+    }
+    
+     //비동기처리
+    let formData = new FormData(modifyForm);
+    let uploadURL = "";
+    
+    console.log("content_files: "+content_files.length);
+    
+    if(content_files.length != 0){ 
+    	uploadURL = '/board/fileUpload?kind=U'; 
+    	for(let i=0; i <content_files.length; i++){
+    		if(!content_files[i].is_delete){
+    			formData.append('sendToFileList', content_files[i]);
+    		}
+    	}	
+    }else{ uploadURL = '/board/modify'; }
+    
+    await fetch(uploadURL,{
+    	method:'POST',
+    	body: formData
+    }).then((res)=>res.json())
+    .then((data)=>{
+    	if(data.message==='GOOD'){
+    		alert('게시물이 수정되었습니다.');
+    		document.location.href='/board/view?seqno='+seqno.value+'&page='+page.value+'&keyword='+keyword.value ;
+    				//+URLEncoder.encode(keyword.value "UTF-8");
+    	}
+    }).catch((err)=>{
+    	alert('게시물 수정 실패');
+    	console.log(err);
+    });//await
+    
+}//modifyForm1 end
+
+</script>
+
+</head>
+<body>
+	
+    <div id="main">
+        <img src="/images/logo.jpg" id="topBanner"><br> <!-- 해당 파일이 아니라 webroot 기준으로 상대경로 설정한다.-->
+        <h1>게시물 수정</h1>
+        <br>
+        <div id="formZone">
+           <!-- <form class="modifyForm" name="modifyForm" method="post" enctype="x-www-">--> 
+            <form class="modifyForm" name="modifyForm" method="post">
+                <input type="text" class="input_field" name="writer" th:value="${view.writer}" disabled>
+                <input type="text" id="title" class="input_field" name="title" th:value="${view.title}"><br><br>
+                <textarea id="content" cols="100" rows="500"  name="content" th:text="${view.content}"></textarea>
+                
+                <input type="hidden" id="seqno" name="seqno" th:value="${view.seqno}">
+                <input type="hidden" id="page" name="page" th:value="${page}">
+                <input type="hidden" id="keyword" name="keyword" th:value="${keyword}">
+                <input type="hidden" id="writer" name="writer" th:value="${session.username}">
+                <input type="hidden" name="email" th:value="${session.email}">
+                
+                  <!-- 파일리스트  -->
+                <div style="width:90%; margin:auto" >
+		        		<div id="fileList" > 
+			        		<p th:each="list:${fileList}" style="text-align:left">
+			        		 	삭제: <input type="checkbox" name="deleteFileList" th:value='${list.fileseqno}'/>
+			        		 	[[${list.org_filename}]] ([[${list.filesize}]]Byte)
+			        		</p>
+		        		</div>
+	        	 </div>
+	        	  
+	        	  <!-- 파일업로드  -->
+	        	  <div class="fileuploadForm">
+            		<input type="file" id="inputFile" name="uploadFile" style="display:none;" multiple />
+            		<div class="fileZone" id="fileZone">
+            			파일첨부를 하기 위해서는 클릭하거나 파일을 드래그하세요<br>
+           		    	첨부파일은 최대 5개까지 가능
+         			</div>
+         			<div class="fileuploadList" id="fileuploadList" name="fileuploadList"></div>
+	             	</div>
+	        	
+                <input type="button" class="btn_write" value="수정" onclick="modifyForm1()">
+                <input type="button" class="btn_cancle" value="취소" onclick="history.back()"> <!--history 자바스크립트 내장 객체-->
+            </form>
+        </div>
+        <br><br>
+    </div>
+    
+</body>
+</html>

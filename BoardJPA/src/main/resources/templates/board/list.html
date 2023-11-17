@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>게시물 리스트</title>
+        <link rel="stylesheet" href="/css/board.css">
+        <style>
+
+            body{font-family: "나눔고딕","맑은고딕";}
+            h1{font-family: "HY견고딕";}
+            a:link{color:black;}
+            a:visited{color: black;}
+            a:hover{color: red;}
+            a{text-decoration: none;cursor: hand;}
+
+            .InfoTable {
+                border-collapse: collapse;
+                border: 3px solid #168;
+                width: 800px;
+                margin: auto;
+                text-align: center;
+            }
+            .InfoTable th {
+                color: #168;
+                background: #f0f6f9;
+            }
+            .InfoTable th, .InfoTable td {
+                padding: 10px;
+                border: 1px solid #ddd;
+            }
+            .InfoTable th:first-child, .InfoTable td:first-child {
+                border-left: 0;
+            }
+            .InfoTable th:last-child, .InfoTable td:last-child {
+                border-right: 0;
+            }
+            .InfoTable tr td:first-child{
+                text-align: center;
+            }
+            
+            #itemZone{
+                margin:auto;
+                text-align: center;
+                border: solid;
+                padding: 50px;
+            }
+            #tableZone{
+                width: 800px;
+                margin: auto;
+                font-Size: 200%;
+            }
+            .main{
+                text-align: center;
+            }
+
+            .topBanner{
+                margin-top: 10px;
+                margin-bottom: 10px;
+                max-width: 500px;
+                height: auto;
+                display: block;
+                margin: auto;
+            }
+            
+            .bottom_menu{
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .bottom_menu > a:link, .bottom_menu a:visited {
+                background-color: rebeccapurple;
+                color: #168;
+                padding: 15px 25px;
+                display: inline-block;
+                text-decoration: none;
+            }
+
+            .bottom_menu > a:hover, .bottom_menu > a:active {
+                background-color: #168;
+                text-decoration: none;
+            }
+
+            
+        </style>
+    <script>
+    	const press = () => {
+    		if(event.keycode == 13) search(); //event = 눌렀을 때 받는 이벤트
+    	}
+    	
+    	const search = () => {
+    		const keyword = document.querySelector('#keyword');
+    		document.location.href='/board/list?page=1&keyword='+ keyword.value;
+    	}
+
+    	const logout = () => {
+    		if(confirm('로그아웃할겨?'))
+    		{   
+    			document.cookie = 'email=; path=/; max-age=0';
+    			document.cookie = 'password=; path=/; max-age=0';
+    			document.cookie = 'authkey=; path=/; max-age=0';
+    			document.location.href='/member/logout';
+    		}
+    	} 
+    	
+    	const beforeLogout = () => {
+            if(confirm('로그아웃하시겠습니까?')) {
+                const FromSocial = '[[${session.FromSocial}]]';
+
+                let authkey = getCookie('authkey');
+                if(authkey != undefined)
+                    document.cookie = 'authkey=' + authkey + '; path=/; max-age=0'
+                if(FromSocial === 'Y') {
+                    document.cookie = 'JSESSIONID=;path=/;max-age=0';
+                    fetch('/member/invalidate',{
+                        method:'POST'
+                    });
+                    window.location = "https://mail.google.com/mail/u/0/?logout&h1=en";
+                }
+                else 
+                    document.location.href='/member/logout';
+            }
+        }
+    	
+    </script>
+    </head>
+    <script>
+		//if('[[${session.email}]]'== ''){
+		//	window.location.href = '/';
+		//}
+	</script>
+
+    <body>
+	
+        <div class="main">
+            <img src="/images/logo.jpg" class="topBanner"><br>
+        </div>
+        <h1 style="text-align:center;">게시물 목록</h1>
+        <div style="text-align:center;">
+	        <input type="text" name="keyword" id="keyword" 
+	        style="width:40%; height:30px; border:2px solid #168; font-size:16px;" placeholder="키워드" onkeydown="press()">
+			 <input type="button" value="검색" style="width:5%; height:30px; background:#158; color:white; font-weight:bold;"
+			  cursor:pointer; onclick="search()">
+        	<br><br>
+        </div>
+        <table class="InfoTable">
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성일</th>
+                <th>조회수</th>
+            </tr>
+    		
+            <tr th:each="list,index:${list}"
+            onmouseover="this.style.background='#46D2D2'"
+            onmouseout="this.style.background='white'">
+                <!-- <td th:text="${list.seq}"></td> -->
+                <td th:text="${totalElm - (page-1)*postNum - index.count + 1}"></td>
+                <td style="text-align:left;"> 
+	                <a th:href="@{'/board/view?seqno='+${list.seqno}+'&page='+${page}+'&keyword='+${keyword}}" 
+	                onmouseover="this.style.textDecoration='underline'"
+	                	onmouseout="this.style.textDecoration='none'">
+	                <span th:text="${list.title}"></span>
+	                </a>
+                </td>
+                <td th:text="${list.writer}"></td>
+                <td th:text="${list.regdate}"></td>
+                <!-- <td> <fmt:formatDate value="${list.regdate}" type="both" pattern="yyyy-MM-dd [E] a hh:mm:ss" /></td>   -->
+                <td th:text="${list.hitno}"></td>
+            </tr>
+        </table>
+      
+        <div style="text-align:center;">
+        	[(${pageList})]
+        </div>
+        
+        <div class="bottom_menu">
+			<a href="/board/list?page=1">처음으로</a>&nbsp;&nbsp;
+          	<a href="/board/write">글쓰기</a>&nbsp;&nbsp;
+          	<a href="/board/memberinfo">사용자관리</a>&nbsp;&nbsp;
+          	<th:block th:if="${session.role=='MASTER'}">
+          		<a href="/master/sysManage">시스템관리</a>&nbsp;&nbsp;
+          	</th:block>
+          	<a href="javascript:logout()">로그아웃</a>&nbsp;&nbsp;
+        </div>
+    </body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Insert title here</title>
+	<link rel="stylesheet" href="/resources/css/board.css">
+	<script>
+	
+		const addrCheck = (zipcode,addr1,addr2,addr3) => {
+			window.opener.document.getElementById('zipcode').value = zipcode;
+			window.opener.document.getElementById('addr1').value = addr1+addr2+addr3;
+			window.close();
+		};
+		
+	</script>
+</head>
+<body>
+	<div class="main">
+		<h1>주소검색</h1>
+		<table class="Infotable">
+			<tr>
+				<th>우편번호</th>
+				<th>주소</th>
+				<th>선택</th>
+			</tr>
+			<tbody>
+				 <tr th:each="list:${list}" >
+						<td>[[${list.zipcode}]]</td>
+						<td>[[ ${list.province} ]] [[ ${list.road} ]] [[ ${list.building} ]]<br> [[ ${list.oldaddr} ]]</td>
+						<td><input type="button" th:onclick="addrCheck([[${list.zipcode}]],[[${list.province}]],[[${list.road}]],[[${list.building}]])" value="선택"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div style="text-align:center;">[(${pageList})]<div>
+</body>
+</html>

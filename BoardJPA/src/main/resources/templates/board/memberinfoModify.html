@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>회원기본정보수정</title>
+	<link rel="stylesheet" href="/css/board.css">
+	<style>
+		.imageZone{
+			border: 2px solid #92AAB0;
+			width: 60%;
+			height: auto;
+			color: #92AAB0;
+			text-align: center;
+			vertical-align: middle;
+			margin: auto;
+			padding: 10px 10px;
+			font-size: 200%;
+		}
+		
+		.addrSearch{
+			width: 80%;
+			border: none;
+			border-bottom: 2px solid #adadad;
+			margin: 5px;
+			padding: 10px 10px;
+			outline: none;
+			color: #636e72;
+			font-size: 16px;
+			height: auto;
+			background: none;
+		}
+		
+	</style>
+</head>
+<script>
+
+	//JS 람다식
+	window.onload = () => {
+		
+		var imgCheck = "N";
+		var imgZone = document.querySelector('#imageZone');
+		var fileEvent = document.querySelector('#imageFile');
+		
+		//imageZone 영역 클릭 시 이벤트 정보를 담고 있는 event(e)라는 객체를 자동생성
+		imgZone.addEventListener('click', (e) => {
+			fileEvent.click(e); //사용자가 만든 UI를 통해 input file을 클릭하는 것과 동일 효과
+		});
+		
+		fileEvent.addEventListener('change', (e) => {
+			const files = e.target.files; //선택한 파일 정보가 e.target.files 배열에 저장 e.target.files -> JS 프로토타입
+			showImage(files);
+		});
+		
+		const showImage = (files) => {
+			imgZone.innerHTML = "";
+			const imgFile = files[0];
+			
+			if(imgFile.type.indexOf("image") < 0)
+			{
+				alert("이미지 파이만 올렺려주새료");
+				return false;
+			}
+		
+			const reader = new FileReader(); //연산자를 통해서 FileReader 객체를 reader가 참고
+			reader.onload = function(event)
+			{ // 2. reader.readAsDataURL(imgFile)로 이미지로 읽고 나서 이후 작업
+				imgZone.innerHTML = "<img src="+event.target.result+ " id='uploadImg' style='width:360px; height:auto'>";
+			};
+		
+			reader.readAsDataURL(imgFile);//1. 실제로 파일을 읽는 부분
+			imgCheck='Y';
+			//console.log(event.target.result);
+		}//const showImage
+		
+		btnRegister.addEventListener('click',async()=>{
+			
+			//유효성 검사
+			if(imgCheck == 'N'){alert('프로필 이미지를 등록하세요.'); return false;}
+			
+			const PASS = password.value;
+			const PASS1 = password1.value;
+			if(PASS==''){alert('암호를 입력하세요.'); password.focus(); return false;}
+			if(PASS1==''){alert('암호를 입력하세요.'); password1.focus(); return false;}
+			if(PASS != PASS1){alert('암호가 맞지 않습니다.'); password1.focus(); return false;}
+			
+			//자바스크립트의 정규식을 이용해서 암호 규칙 확인
+			//암호 규칙 1. 8-20자리 내의 영문, 숫자, 특수문자를 조합해서 작성해야함
+			
+			let num = PASS.search(/[0-9]/g); //search 메소드다, 정규식에 맞지 않으면 -1을 리턴함
+			let eng = PASS.search(/[a-z]/ig); //i는 대소문 구분없이
+			let spe = PASS.search(/[`~!@#$%^&*|\\\'\";:\/?]/ig); //특수문자 
+			/* if(PASS.length < 8 || PASS.length > 20){
+				alert('암호는 8~20자 이내로 입력해 주세요.');
+				return false;
+			}else if(PASS.search(/\s/)!=-1){ 
+				alert('암호는 공백없이 입력해 주세yo');
+				return false;
+			}else if(num < 0 || eng < 0 || spe < 0){
+				alert('암호는 영문, 숫자, 특수문자 혼합 입력해 주세yo');
+				return false;
+			} */
+			
+			//const gender = document.querySelector('input[name="gender"]:checked');
+			let gender = document.querySelectorAll('input[name="gender"]:checked');
+			//const gender = document.getElementsByName('gender');
+			
+			let genderValue = '';
+			for(let i=0; i<gender.length; i++){
+				if(gender[i].checked===true){genderValue = gender[i].value;}
+			}
+			
+			if(genderValue == ''){
+				alert('성별을 선택하세요.');
+				return false;
+			}
+			
+			const hobby = document.querySelectorAll('input[name="hobby"]:checked'); //유사 배열
+			let hobbyArray = []; //배열생성 시 new 안 써 줘도 됨, ES6+ 문법
+			for(let i=0; i<hobby.length; i++){
+				hobbyArray.push(hobby[i].value);
+			}
+			
+			const job = document.querySelector('select[name="job"] option:checked');
+			
+			if(job.value == '' || job.value == 'default1'){
+				alert('직업을 선택하세요.');
+				return false;
+			}
+			
+			if(hobbyArray.length == 0){
+				alert('취미를 선택하세요.');
+				return false;
+			}
+			
+			if(zipcode.value == ''){
+				alert('우편번호가 없습니다.');
+				return false;
+			}
+			
+			if(addr2.value == ''){
+				alert('상세주소를 입력하세요.');
+				addr2.focus(); 
+				return false;
+			}
+			
+			if(description.value == ''){
+				alert('자소를 입력하세요.');
+				description.focus(); 
+				return false;
+			}
+			
+			address.value = addr1.value + " " + addr2.value;
+			
+			if(telno.value == ''){
+				alert('전화번호를 입력하세요.');
+				telno.focus(); 
+				return false;
+			}
+			
+			const beforeTelno = telno.value;
+			const afterTelno = beforeTelno.replace(/\-/ig,'').replace(/\ /ig,'').trim(); //전화번호에 -,공백 빼기
+			telno.value = afterTelno;
+			
+			
+			//let email1 = email.value.search(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/ig);
+			if(nickname.value=='' || nickname == -1){  //이메일 유효성검사
+				alert('nickname을 잘 입력하세요.');
+				nickname.focus(); 
+				return false;
+			}
+			
+			let formData = new FormData(RegistryForm); //자동으로 직렬화 //JS에서는 상속 // id는 DOM 구조의 지시어
+			await fetch('/member/signup',{
+			 	method: "POST",
+			 	body: formData
+		   }).then((res)=>res.json())
+		   .then((data)=>{ 
+			   if(data.message === 'GOOD'){
+				   alert(decodeURIComponent(data.username)+'님 회원가입을 축하합니다.');
+				   document.location.href='/';
+				}else{
+					alert('회원가입 실패');
+				}
+		   }).catch((error)=>{
+				console.log("error="+error);
+			})
+			
+			//document.RegistryForm.action = "/member/signup";
+	       //document.RegistryForm.submit();
+			
+		});
+	} //window.onload 
+	
+	//체크박스 모두 선택하기
+	const selectAll = (checkElement) => 
+	{
+		const checkboxes = document.getElementsByName('hobby');
+		checkboxes.forEach((checkbox)=>{
+			checkbox.checked = checkElement.checked;	
+		});
+	}
+	
+	//주소검색하기
+	const searchAddr = () => {
+		if(addrSearch.value == ''){
+			alert('검색할 주소를 입력하세요');
+			addrSearch.focus();
+			return false;
+		}
+
+		window.open(
+			"/member/addrSearch?page=1&keyword="+addrSearch.value,
+			"주소검색",
+			"width=900, height=540, top=50, left=50"
+		);
+	}
+	
+	const signUpSubmit = () => {
+		 document.RegistryForm.action = "/member/signup";
+        document.RegistryForm.submit();
+	}
+	
+	
+</script>
+
+<body>
+	<div class="main">
+		<h1>회원기본정보수정</h1>
+		<div class="WriteForm">
+			<form id="RegistryForm" name="RegistryForm" method="post" enctype="multipart/form-data">
+				<br><br>
+				<span>이미지 수정을 원하시면 이미지를 클릭</span>
+				<input type="file" name="fileUpload" id="imageFile" style="display:none">
+				<div class="imageZone" id="imageZone">클릭 후 탐색창에서 사진을<br>선택해 주세요.</div>
+				<div style="width:90%; text-align:left; position:relative; left:15px; border-bottom:2px solid #adadad; margin:10px; padding: 10px;">
+					성별: 
+					<label><input type="radio" name="gender" value="M">M</label> 
+					<label><input type="radio" name="gender" value="F">F</label><br>
+					취미: 
+					<label><input type="checkbox" id="all" name="all" onclick="selectAll(this)">ALL</label> 
+					<label><input type="checkbox" name="hobby" value="음악감상">음악감상</label>
+					<label><input type="checkbox" name="hobby" value="영화보기">영화보기</label> 
+					<label><input type="checkbox" name="hobby" value="운동">운동</label> <br>
+					직업 :
+					<select name="job">
+						<option value="default1" disabled selected >----</option>
+						<option value="개발자">개발자</option>
+						<option value="디자이너">디자이너</option>
+						<option value="치킨집">치킨집</option>
+					</select>
+				<br>
+				</div>
+				<input type="text" id="addrSearch" name="addrSearch" class="addrSearch" placeholder="address">
+				<input type="button" id="btn_addrSearch" class="btn_addrSearch" value="search" onclick="searchAddr()">
+				<input type="text" id="zipcode" class="input_field" name="zipcode" value="우편번호가 검색되어 입력됩니다." placeholder="zipcode" readonly >
+				<input type="text" id="addr1" class="input_field" name="addr1"  placeholder="주소가 검색되어 입력됩니다."  readonly >		
+				<input type="text" id="addr2" class="input_field" name="addr2"  placeholder="상세주소 입력하세요">	
+				<input type="hidden" id="address" name="address">	
+				<input type="text" id="telno" class="input_field" name="telno"  placeholder="tel">	
+				<input type="text" id="nickname" class="input_field" name="nickname"  placeholder="nickname">
+				<p style="color:red">일반 사용자 권한으로 등록됩니다.</p>	
+				<textarea class="input_content" id="description" cols="100" rows="500" name="description" placeholder="소개입력" ></textarea>
+				<div class ="bottom_menu">
+					<input type="button" id="btnRegister" class="btn_write" value="클릭ㄱ"  >
+					<input type="button" id="btn_cancle" class="btn_write" value="취소" onclick="history.back()"> <!--history 자바스크립트 내장 객체-->
+				</div>
+			</form>
+		</div>
+	</div>
+	<br><br>
+</body>
+</html>

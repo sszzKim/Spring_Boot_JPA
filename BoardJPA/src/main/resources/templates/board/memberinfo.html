@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>회원정보보기</title>
+<link rel="stylesheet" href="/css/board.css">
+<style>
+    .items{
+            width: 90%;
+            border: none;
+            border-bottom: 2px solid #adadad;
+            padding: 10px 10px;
+            outline: none;
+            color: #636e63;
+            height: 25px;
+            background: none;
+        }
+
+      #content{
+          width: 90%;
+          height: 300px;
+          box-sizing: border-box;
+          border: solid gray;
+          font-size: 16px;
+          resize: both;
+      }
+      
+     .textArea{
+    width: 90%;
+    height: 350px;
+    /* 자동 스크롤 */
+    overflow: auto;
+    margin: 23px;
+    padding:10px;
+    box-sizing: border-box;
+    border: 2px solid #adadad;
+    text-align: left;
+    font-size: 16px;
+    resize:both;
+  }
+</style>
+</head>
+<body>
+ <div class="main">
+	 <img src="/images/logo.jpg" class = "topBanner" ><br>
+	 <h1 style ="text-align: center;">회원정보보기</h1>
+	 <div class="boardView">
+	 <div style="width:70%; height:auto; margin:auto; padding:20px; border:none">
+	 		
+	       <img th:src="@{'/profile/'+${view.stored_filename}}" style="disply:block; width:80%; height:auto; margin:auto;">
+	      
+	       <div class = "items">
+	          id : [[ ${view.email} ]]
+	       </div>
+	       <div class="items">
+	           이름 : [[ ${view.username} ]]
+	       </div>
+	       <div class="items">
+	           성별 :[[ ${view.gender} ]]
+	       </div>
+	        <div class="items">
+	           직업 : [[ ${view.job} ]]
+	       </div>
+	        <div class="items">
+	           취미 : [[ ${view.hobby} ]]
+	       </div>
+	        <div class="items">
+	           전화번호 : [[ ${view.telno} ]]
+	       </div>
+	       <div class="items">
+	          이메일 : [[ ${view.email} ]]
+	       </div>
+	       <div class="items">
+	          가입일자 : [[ ${view.regdate} ]]
+	       </div>
+	       <div class="items">
+	          최종 로그인 날짜 : [[ ${view.lastlogindate} ]]
+	       </div>
+	       <div class="items">
+	          최종 로그아웃 날짜 : [[ ${view.lastlogoutdate} ]]
+	       </div>
+	       <div class="items">
+	          최종 비밀번호 변경 날짜 : [[ ${view.lastpwdate} ]]
+	       </div>
+	       <th:block th:if="${view.role=='USER'}">
+	       <div class="items">
+	          권한 : 일반 사용자
+	       </div>
+	       </th:block>
+	       <th:block th:if="${view.role=='MASTER'}">
+	       <div class="items">
+	          권한 : 관리자
+	       </div>
+	       </th:block>
+	       <div class="textArea">
+	           <pre> [[ ${view.description} ]] </pre>
+	       </div>
+    </div>
+	</div>
+	<div class ="bottom_menu">
+	<a href="/">처음으로</a>&nbsp;&nbsp;
+	<a href="#">기본정보 변경</a>&nbsp;&nbsp;
+	<a href="/board/memberPasswordModify">패스워드 변경</a>&nbsp;&nbsp;
+	<a href="#">회원탈퇴</a>&nbsp;&nbsp;
+	</div>
+</div>
+</body>
+</html>

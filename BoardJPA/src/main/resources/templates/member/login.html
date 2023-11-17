@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>로그인</title>
+<link rel="stylesheet" href="/css/board.css">
+	<style>
+        body {font-family: "나눔고딕", "맑은고딕";}
+        h1{font-family: "HY견고딕"; color: rgb(81, 144, 160);}
+        a:link {color: black;}
+        a:visited {color: black;}
+        a:hover {color: red;}
+        a {text-decoration: none; cursor: hand;}
+
+        .main {
+            text-align: center;
+        	}
+        .topBanner{
+            margin-top: 10px;
+            margin-bottom: 10px;
+            max-width: 500px;
+            height: auto;
+            display: block;
+            margin: auto;
+        	}
+        .login{
+        	width:50%;
+        	height:auto;
+        	margin:auto;
+        	padding:20px, 20px;
+        	background-color:#FFFFFF;
+        	text-align: center;
+        	border: 5px solid gray;
+        	border-radius: 30px;
+        }
+        
+        .email, .password{
+        	width:80%;
+        	height: 25px;
+        	border: none;
+        	border-bottom: 2px solid #adadad;
+        	outline: none;
+        	color: #636e72;
+        	font-size: 16px;
+        	background: none;
+        	margin-top: 20px;
+        }
+        
+        .bottomText{
+        text-align: center;
+        font-size: 20px;
+        }
+        
+        .btn_login{
+        position:relative;
+        left:40%;
+        transform:translateX(-50%);
+        width: 80%;
+        height:40px;
+        background:linear-gradient(125deg,#81ecec,#6c5ce7,#81ecec);
+        background-position: left;
+        background-size:200%;
+        color:white;
+        font-weight:bold;
+        border:none;
+        cursor:pointer;
+        transition:0.4s;
+        display:inline;
+        }
+  </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+<script>
+	
+	   window.onload = async()=>{
+		   
+		   const getCookie = (name) =>{
+			   //쿠키 가져 오기
+			   const cookies = document.cookie.split(`; `).map((el)=>el.split('=')); //cookie는 문자열로 구성, ` -> 있는 그대로
+		   		let getItem = [];
+			   
+			   for(let i=0; i<cookies.length; i++){
+				  if(cookies[i][0]===name){
+					  getItem.push(cookies[i][1]);
+					  break;
+				  }
+			   }
+			   
+			   if(getItem.length>0){
+				   return decodeURIComponent(getItem[0]);
+			   }
+		   }//getCookie
+		   
+		   /* const session_email = '[[${session.email}]]';
+		   if(getCookie('remember-me') !== '' && session_email !== '')
+				document.location.href='/board/list?page=1'; */
+
+		   let userid = getCookie('email');
+		   let password = getCookie('password');
+		   let authkey = getCookie('authkey');
+		   
+		   //email 쿠키가 존재하면
+		   if(email !== undefined) { 
+			   document.querySelector('#rememberEmail').checked = true;
+			   document.querySelector('#email').value = userid;
+			}else{ document.querySelector('#rememberEmail').checked = false; }
+		   
+		   //패스워드 쿠키가 존재하면
+		   if(password !== undefined) {
+			   document.querySelector('#rememberPassword').checked = true;
+			   
+			   //64인코딩 된 -> 디코딩
+			   const decrypt = CryptoJS.enc.Base64.parse(password);
+			   const hashData = decrypt.toString(CryptoJS.enc.Utf8);
+			   password = hashData;
+			   document.querySelector('#password').value = password;
+		   }else{ document.querySelector('#rememberPassword').checked = false; }
+		   
+	   }//window.onload 
+	   
+	   const login =()=>{
+		   document.loginForm.action = '/member/login';
+		   document.loginForm.submit();
+		   //document.querySelector('#loginForm').submit();
+		}
+	
+		const loginCheck = async() => {
+
+			//그놈의 유효성검사
+			const email = document.querySelector("#email");
+			const password = document.querySelector("#password");
+			//const authkey = '12345';
+			const rememberMe = document.querySelector("#rememberMe");
+			
+			if(email.value === ''){
+				alert("id 넣어");
+				userid.focus();
+				return false;
+			}
+			
+			if(password.value === ''){
+				alert("password 넣어");
+				password.focus()
+				return false;
+			}
+			
+			let formData = new FormData();
+			formData.append("email", email.value);
+			formData.append("password", password.value);
+			//formData.append("authkey", "");
+			
+			await fetch('/member/loginCheck',{ //스프링 시큐리티는 패스워드 체크가 안 된다, 별도로 체크해주는게 필요함
+				method:"POST",
+				body:formData
+			}).then((res)=> res.json())
+				.then((data) => {
+					if(data.message == 'GOOD'){
+							cookieManage(email.value, password.value);
+							login();
+						}
+					else if(data.message == 'ID_NOT_FOUND'){msg.innerHTML="존재하지 않는 아이디";}
+					else if(data.message == 'PASSWORD_NOT_FOUND'){msg.innerHTML="잘못된 비번";}
+					else {alert("시스템 장애로 로그인 실패");}
+				}).catch((error)=>{
+					console.log("error="+error);
+				})
+			
+			//document.loginForm.action = '/member/login';
+			//document.loginForm.submit();
+		}
+		
+		//email 체크 관리
+		const checkRememberUserid = () => {
+			if(document.querySelector('#rememberEmail').checked) 
+				document.querySelector('#rememberMe').checked = false;
+		}
+		
+		//password 체크 관리
+		const checkRememberPassword = () => {
+			if(document.querySelector('#rememberPassword').checked) 
+				document.querySelector('#rememberMe').checked = false;
+		}
+		
+		//자동로그인 체크 관리
+		const checkRememberMe = () => {
+			if(document.querySelector('#rememberMe').checked)
+			{
+				document.querySelector('#rememberEmail').checked = false;
+				document.querySelector('#rememberPassword').checked = false;
+			}
+		}
+		
+		//쿠키 관리
+		const cookieManage = (email, password)=> {
+			if(rememberEmail.checked){document.cookie = 'email=' + email + '; path=/; expires=Sun, 31, Dec 2023 23:59:59 GMT';}
+			else{document.cookie = 'email=' + email + '; path=/; max-age=0';}
+			
+			//Base64(양방향 복호화)로 패스워드 인코딩
+			const key = CryptoJS.enc.Utf8.parse(password); //key 생성
+			const base64 = CryptoJS.enc.Base64.stringify(key);
+			password = base64;
+			
+			if(rememberPassword.checked){document.cookie = 'password='+password+'; path=/; expires=Sun, 31, Dec 2023 23:59:59 GMT';}
+			else{document.cookie = 'password='+password+'; path=/; max-age=0';}
+			
+		}
+		
+		const press=()=>{
+			if(event.keyCode == 13)loginCheck();
+		}
+		
+	</script>
+		
+</head>
+<body>
+	
+	<div class="main">
+		<div class="topBanner">
+			<img class="topBanner" src="/images/logo.jpg" title="서울기술교육센터">
+		</div>
+		<div class="login">
+			<h1>login</h1>
+			<form name="loginForm" id="loginForm"  method="post">
+				<input type="text" class="email" name="email" id="email" placeholder="please, ID"/><br><br>
+				<input type="password" class="password" name="password" id="password" placeholder="please, Password" onkeydown="press()"/>
+				<p id="msg" style="color:red; text-align:center"></p><br>
+				<input type="checkbox" name="rememberEmail" id="rememberEmail" onclick="checkRememberUserid()"/>아이디 기억
+				<input type="checkbox" name="rememberPassword" id="rememberPassword" onclick="checkRememberPassword()"/>패스워드 기억
+				<input type="checkbox" class="remember" name="remember-me" id="rememberMe" onclick="checkRememberMe()"/>자동 로그인
+				<br><a href="/oauth2/authorization/google">구글계정으로 로그인</a> 
+				<br><br>
+				<input type="button" id="btn_login" class="btn_login" value="login" onclick="loginCheck()">
+			</form>
+			<div class="bottomText">사용자가 아니면 <a href="/member/signup">[ 여기 ]</a>를 눌러 등록<br><br><br>
+			  [<a href = "/member/searchID" oneMouseover="this.style.backgroound='pink'; this.style.textDecoration='underline';"
+            onmouseout="this.style.background='white'; this.style.textDecoration='none';">아이디</a> |
+        <a href = "/member/searchPassword" oneMouseover="this.style.backgroound='pink'; 
+                    this.style.textDecoration='underline';"
+            onmouseout="this.style.background='white'; this.style.textDecoration='none';">비밀번호</a> 찾기] <br><br>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

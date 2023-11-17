@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="/css/board.css">
+<style>
+.passwordModify{
+ 	width:50%;
+ 	height:auto;
+ 	margin:auto;
+ 	padding:20px, 20px;
+ 	background-color:#FFFFFF;
+ 	text-align: center;
+ 	border: 5px solid gray;
+ 	border-radius: 30px;
+ }
+ 
+ .userid, .password{
+ 	width:80%;
+ 	height: 25px;
+ 	border: none;
+ 	border-bottom: 2px solid #adadad;
+ 	outline: none;
+ 	color: #636e72;
+ 	font-size: 16px;
+ 	background: none;
+ 	margin-top: 20px;
+ }
+ 
+ .bottomText{
+ text-align: center;
+ font-size: 20px;
+ }
+ 
+ .btn_login{
+ position:relative;
+ left:40%;
+ transform:translateX(-50%);
+ width: 80%;
+ height:40px;
+ background:linear-gradient(125deg,#81ecec,#6c5ce7,#81ecec);
+ background-position: left;
+ background-size:200%;
+ color:white;
+ font-weight:bold;
+ border:none;
+ cursor:pointer;
+ transition:0.4s;
+ display:inline;
+ }
+</style>
+</head>
+<body>
+왜 안보여
+<div class="main">
+	<div class="topBanner">
+		<img class="topBanner" src="/images/logo.jpg" title="서울기술교육센터">
+	</div>
+	<div class="ModifyForm">
+		<p><h1>패스워드를 변경해 주세요</h1></p>
+		<input type="button" class="btn_write" value="30일 후에 변경" onclick="" />
+		<input type="button" class="btn_cancel" value="지금 변경" onclick="" />
+	</div>
+</div>
+</body>
+</html>
